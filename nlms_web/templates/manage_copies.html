@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manage Copies</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 text-gray-800">
+    <header class="bg-white shadow py-4"><div class="max-w-4xl mx-auto flex justify-between px-4"><h1 class="text-2xl">Manage Copies</h1><a href="/books" class="text-blue-500">Back to Books</a></div></header>
+    <div class="max-w-4xl mx-auto my-6">
+      <a href="/copies/add" class="bg-green-500 text-white px-4 py-2 rounded">Add Copy</a>
+      <table class="w-full mt-4 table-auto bg-white rounded shadow overflow-hidden">
+        <thead><tr class="bg-gray-200"><th class="px-4 py-2">ID</th><th>Title</th><th>ISBN</th><th>Branch</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for c in copies %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ c[0] }}</td>
+            <td class="px-4 py-2">{{ c[1] }}</td>
+            <td class="px-4 py-2">{{ c[2] }}</td>
+            <td class="px-4 py-2">{{ c[3] }}</td>
+            <td class="px-4 py-2">{{ c[4] }}</td>
+            <td class="px-4 py-2">
+              <a href="/copies/edit/{{ c[0] }}" class="text-blue-600 hover:underline">Edit</a>
+              <a href="/copies/delete/{{ c[0] }}" class="ml-2 text-red-600 hover:underline">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></body></html>
+    

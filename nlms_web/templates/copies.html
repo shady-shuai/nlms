@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Library Copies</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- 顶部导航 -->
+  <header class="bg-white shadow py-4">
+    <div class="max-w-3xl mx-auto flex justify-between px-4">
+      <h1 class="text-2xl font-bold">Library System</h1>
+      <div>
+        <span class="mr-4">Hi, {{ user_name }}</span>
+        <a href="/logout" class="text-blue-500 hover:underline">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash 消息 -->
+  <div class="max-w-3xl mx-auto mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="mb-2 px-4 py-2 rounded {{ 'bg-green-200 text-green-800' if category=='success' else 'bg-red-200 text-red-800' }}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <div class="max-w-3xl mx-auto my-6">
+    <!-- 搜索 & 分馆过滤 -->
+    <form class="flex mb-4" method="get" action="/copies">
+      <input
+        name="q"
+        value="{{ q }}"
+        placeholder="Search title or ISBN..."
+        class="flex-grow border px-3 py-1 rounded-l"
+      >
+      <select name="branch_id" class="border-t border-b border-l px-2">
+        <option value="" {% if not selected_branch %}selected{% endif %}>All Branches</option>
+        {% for b in branches %}
+          <option value="{{ b[0] }}" {% if b[0]|string == selected_branch %}selected{% endif %}>
+            {{ b[1] }}
+          </option>
+        {% endfor %}
+      </select>
+      <button class="bg-blue-500 text-white px-4 rounded-r">Filter</button>
+    </form>
+
+    <!-- 我的借阅按钮 -->
+    <div class="flex justify-end mb-4">
+      <a href="/my-borrowings" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        My Borrowings
+      </a>
+    </div>
+
+    <!-- 副本列表 -->
+    <div class="space-y-4">
+      {% for c in copies %}
+        <div class="bg-white p-4 rounded shadow flex justify-between items-center">
+          <div>
+            <h2 class="font-semibold">{{ c[1] }} <span class="text-sm text-gray-500">({{ c[2] }})</span></h2>
+            <p class="text-sm">
+              Status: {{ c[3] }}<br>
+              Branch: {{ c[4] }}
+            </p>
+          </div>
+          <div>
+            {% if user_role == 'admin' %}
+              <a href="/copies/delete/{{ c[0] }}" class="text-red-600 hover:underline">Delete</a>
+            {% else %}
+              {% if c[0] in borrowed %}
+                <a href="/copies/return/{{ c[0] }}" class="bg-yellow-500 text-white px-3 py-1 rounded">Return</a>
+              {% else %}
+                {% if c[3] == 'available' %}
+                  <a href="/copies/borrow/{{ c[0] }}" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                    Borrow
+                  </a>
+                {% else %}
+                  <button disabled class="bg-gray-300 text-gray-600 px-3 py-1 rounded cursor-not-allowed">Unavailable</button>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 分页 -->
+    <div class="flex justify-center mt-6 space-x-2">
+      {% if page > 1 %}
+        <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page=1" class="px-3 py-1 border rounded">« First</a>
+        <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page={{page-1}}" class="px-3 py-1 border rounded">‹ Prev</a>
+      {% endif %}
+      {% for p in page_window %}
+        <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page={{p}}"
+           class="px-3 py-1 border rounded {% if p==page %}bg-blue-500 text-white{% endif %}">
+          {{ p }}
+        </a>
+      {% endfor %}
+      {% if page < total_pages %}
+        <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page={{page+1}}" class="px-3 py-1 border rounded">Next ›</a>
+        <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page={{total_pages}}" class="px-3 py-1 border rounded">Last »</a>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

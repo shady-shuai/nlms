@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Manage Users</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="bg-white shadow py-4">
+    <div class="max-w-4xl mx-auto flex justify-between items-center px-4">
+      <h1 class="text-2xl font-bold">Library System - User Management</h1>
+      <a href="/logout" class="text-blue-500 hover:underline">Logout</a>
+    </div>
+  </header>
+
+  <div class="max-w-4xl mx-auto my-8">
+    <h2 class="text-3xl font-bold mb-6">👥 User List</h2>
+    <a href="/books"
+    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+   ← return
+ </a>
+
+    <table class="min-w-full bg-white shadow rounded">
+      <thead>
+        <tr>
+          <th class="px-4 py-2 border">ID</th>
+          <th class="px-4 py-2 border">Name</th>
+          <th class="px-4 py-2 border">Email</th>
+          <th class="px-4 py-2 border">Phone</th>
+          <th class="px-4 py-2 border">Role</th>
+          <th class="px-4 py-2 border">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="hover:bg-gray-100">
+          <td class="px-4 py-2 border">{{ u[0] }}</td>
+          <td class="px-4 py-2 border">{{ u[1] }}</td>
+          <td class="px-4 py-2 border">{{ u[2] }}</td>
+          <td class="px-4 py-2 border">{{ u[3] }}</td>
+          <td class="px-4 py-2 border">{{ u[4] }}</td>
+          <td class="px-4 py-2 border">
+            {% if u[4] != 'admin' %}
+            <a href="/edit-user/{{ u[0] }}" class="text-blue-600 hover:underline">Edit</a>
+
+          {% else %}
+            <span class="text-gray-400">—</span>
+          {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+        {% for u in users %}
+        <tr class="hover:bg-gray-100">
+          <td class="px-4 py-2 border">{{ u[0] }}</td>
+          <td class="px-4 py-2 border">{{ u[1] }}</td>
+          <td class="px-4 py-2 border">{{ u[2] }}</td>
+          <td class="px-4 py-2 border">{{ u[3] }}</td>
+          <td class="px-4 py-2 border">{{ u[4] }}</td>
+          <td class="px-4 py-2 border">
+            <a href="/edit-user/{{ u[0] }}" class="text-blue-600 hover:underline">Edit</a>
+            <a href="/delete-user/{{ u[0] }}" class="ml-2 text-red-600 hover:underline">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div class="flex justify-center mt-6 space-x-2">
+      {% if page > 1 %}
+        <a href="/manage-users?page=1" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">« First</a>
+        <a href="/manage-users?page={{page-1}}" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">‹ Prev</a>
+      {% endif %}
+      {% for p in page_window %}
+        <a href="/manage-users?page={{p}}"
+           class="px-3 py-1 border rounded {% if p==page %}bg-blue-500 text-white{% else %}bg-white hover:bg-gray-200{% endif %}">
+          {{p}}
+        </a>
+      {% endfor %}
+      {% if page < total_pages %}
+        <a href="/manage-users?page={{page+1}}" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">Next ›</a>
+        <a href="/manage-users?page={{total_pages}}" class="px-3 py-1 border rounded bg-white hover:bg-gray-200">Last »</a>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
