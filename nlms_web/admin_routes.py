@@ -72,7 +72,7 @@ def register_admin(app):
         if session.get("user_role") != "admin":
             return redirect("/login")
 
-        # 分页参数
+        
         page = int(request.args.get("page", 1))
         per_page = 10
         offset = (page - 1) * per_page
@@ -80,12 +80,12 @@ def register_admin(app):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # 用户总数
+        
         cur.execute("SELECT COUNT(*) FROM Users")
         total = cur.fetchone()[0]
         total_pages = max(1, math.ceil(total / per_page))
 
-        # 查询用户列表（按 user_id 倒序）
+        
         cur.execute("""
             SELECT user_id,
                    name,
@@ -99,7 +99,7 @@ def register_admin(app):
         users = cur.fetchall()
         conn.close()
 
-        # 计算分页窗口
+        
         start = max(1, page - 3)
         end   = min(total_pages, page + 3)
         window = list(range(start, end + 1))
@@ -116,7 +116,7 @@ def register_admin(app):
     @app.route("/delete-user/<int:user_id>")
     @app.route("/edit-user/<int:user_id>", methods=["GET", "POST"])
     def edit_user(user_id):
-        # 仅限 admin
+        
         if session.get("user_role") != "admin":
             flash("Only admins can edit users.", "error")
             return redirect(url_for("manage_users"))
@@ -124,7 +124,7 @@ def register_admin(app):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # GET：读取当前信息，渲染表单
+       
         if request.method == "GET":
             cur.execute("""
                 SELECT user_id, name, email, phone, role
@@ -139,23 +139,23 @@ def register_admin(app):
 
             return render_template("edit_user.html", user=user)
 
-        # POST：处理表单提交，更新数据库
+      
         name  = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
         phone = request.form.get("phone", "").strip()
         role  = request.form.get("role")
 
-        # 简单校验
+       
         if not name or not email or role not in ("student","teacher","regular","admin"):
             flash("Please fill in all fields correctly.", "error")
             return redirect(url_for("edit_user", user_id=user_id))
 
-        # 不允许修改其他管理员为非 admin，或自己降级
+       
         if user_id == session.get("user_id") and role != "admin":
             flash("You cannot change your own admin role.", "error")
             return redirect(url_for("edit_user", user_id=user_id))
 
-        # 更新
+        
         try:
             cur.execute("""
                 UPDATE Users
@@ -182,7 +182,7 @@ def register_admin(app):
         cur = conn.cursor()
 
         if request.method == "GET":
-            # 获取所有分类和作者
+        
             cur.execute("SELECT category_id, name FROM Categories")
             categories = cur.fetchall()
             cur.execute("SELECT author_id, CONCAT(first_name,' ',last_name) FROM Authors")
@@ -192,7 +192,7 @@ def register_admin(app):
                                    categories=categories,
                                    authors=authors)
 
-        # POST：处理表单
+       
         title        = request.form.get("title", "").strip()
         isbn         = request.form.get("isbn", "").strip()
         publisher    = request.form.get("publisher", "").strip()
@@ -203,30 +203,30 @@ def register_admin(app):
         new_authors_first = request.form.get("new_authors_first", "").strip().splitlines()
         new_authors_last  = request.form.get("new_authors_last", "").strip().splitlines()
 
-        # 基本校验
+        
         if not title or not isbn or not publisher or not year.isdigit():
             flash("Please fill in title, ISBN, publisher, and year correctly.", "error")
             return redirect(url_for("add_book"))
 
         try:
-            # 1. 处理分类
+            
             if new_category:
                 cur.execute("INSERT INTO Categories (name) VALUES (%s)", (new_category,))
                 category_id = cur.lastrowid
             else:
                 category_id = int(sel_category)
 
-            # 2. 插入 Books
+            
             cur.execute("""
                 INSERT INTO Books (title, isbn, publisher, publication_year, category_id)
                 VALUES (%s,%s,%s,%s,%s)
             """, (title, isbn, publisher, int(year), category_id))
             book_id = cur.lastrowid
 
-            # 3. 处理作者列表
+            
             author_ids = [int(aid) for aid in sel_authors]
 
-            # 新作者：按行对应 first/last
+          
             for fn, ln in zip(new_authors_first, new_authors_last):
                 fn = fn.strip()
                 ln = ln.strip()
@@ -238,7 +238,7 @@ def register_admin(app):
                 )
                 author_ids.append(cur.lastrowid)
 
-            # 4. 插入 BookAuthors
+          
             for aid in author_ids:
                 cur.execute(
                     "INSERT INTO BookAuthors (book_id, author_id) VALUES (%s,%s)",
@@ -286,30 +286,30 @@ def register_admin(app):
             return redirect(url_for("add_book"))
 
         try:
-            # 1. 处理分类：如果 new_category 非空，插入并取回 id；否则用 sel_category
+            
             if new_category:
                 cur.execute("INSERT INTO Categories (name) VALUES (%s)", (new_category,))
                 category_id = cur.lastrowid
             else:
                 category_id = int(sel_category)
 
-            # 2. 插入 Books
+            
             cur.execute("""
                 INSERT INTO Books (title, isbn, publisher, publication_year, category_id)
                 VALUES (%s,%s,%s,%s,%s)
             """, (title, isbn, publisher, int(year), category_id))
             book_id = cur.lastrowid
 
-            # 3. 处理作者列表
+            
             author_ids = []
 
-            # 已选作者
+            
             for aid in sel_authors:
                 author_ids.append(int(aid))
 
-            # 新输入作者，用逗号分隔
+            
             if new_authors:
-                # 格式："First Last, Another Author"
+                # "First Last, Another Author"
                 for name in new_authors.split(","):
                     name = name.strip()
                     if not name: continue
@@ -322,7 +322,7 @@ def register_admin(app):
                     """, (first, last))
                     author_ids.append(cur.lastrowid)
 
-            # 4. 插入 BookAuthors
+            # 4.  BookAuthors
             for aid in author_ids:
                 cur.execute("INSERT INTO BookAuthors (book_id,author_id) VALUES (%s,%s)",
                             (book_id, aid))
@@ -344,7 +344,7 @@ def register_admin(app):
         cur = conn.cursor()
 
         if request.method == "GET":
-            # 取出所有分类和作者，供下拉/多选
+            
             cur.execute("SELECT category_id, name FROM Categories")
             categories = cur.fetchall()
             cur.execute("SELECT author_id, CONCAT(first_name,' ',last_name) FROM Authors")
@@ -354,28 +354,27 @@ def register_admin(app):
                                    categories=categories,
                                    authors=authors)
 
-        # POST：处理表单提交
+        
         title     = request.form.get("title", "").strip()
         isbn      = request.form.get("isbn", "").strip()
         publisher = request.form.get("publisher", "").strip()
         year      = request.form.get("year", "").strip()
         category  = request.form.get("category")
-        author_ids = request.form.getlist("authors")  # 多选
-
-        # 简单校验
+        author_ids = request.form.getlist("authors")  
+        
         if not title or not isbn or not publisher or not year.isdigit() or not category:
             flash("Please fill in all required fields correctly.", "error")
             return redirect(url_for("add_book"))
 
         try:
-            # 插入 Books
+            #  Books
             cur.execute("""
                 INSERT INTO Books (title, isbn, publisher, publication_year, category_id)
                 VALUES (%s, %s, %s, %s, %s)
             """, (title, isbn, publisher, int(year), int(category)))
             book_id = cur.lastrowid
 
-            # 插入 BookAuthors
+            #  BookAuthors
             for aid in author_ids:
                 cur.execute("""
                     INSERT INTO BookAuthors (book_id, author_id)

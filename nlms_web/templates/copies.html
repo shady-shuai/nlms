@@ -7,7 +7,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-  <!-- 顶部导航 -->
+  
   <header class="bg-white shadow py-4">
     <div class="max-w-3xl mx-auto flex justify-between px-4">
       <h1 class="text-2xl font-bold">Library System</h1>
@@ -18,7 +18,7 @@
     </div>
   </header>
 
-  <!-- Flash 消息 -->
+  
   <div class="max-w-3xl mx-auto mt-4">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, msg in messages %}
@@ -30,7 +30,7 @@
   </div>
 
   <div class="max-w-3xl mx-auto my-6">
-    <!-- 搜索 & 分馆过滤 -->
+   
     <form class="flex mb-4" method="get" action="/copies">
       <input
         name="q"
@@ -49,14 +49,14 @@
       <button class="bg-blue-500 text-white px-4 rounded-r">Filter</button>
     </form>
 
-    <!-- 我的借阅按钮 -->
+    
     <div class="flex justify-end mb-4">
       <a href="/my-borrowings" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
         My Borrowings
       </a>
     </div>
 
-    <!-- 副本列表 -->
+    
     <div class="space-y-4">
       {% for c in copies %}
         <div class="bg-white p-4 rounded shadow flex justify-between items-center">
@@ -88,7 +88,7 @@
       {% endfor %}
     </div>
 
-    <!-- 分页 -->
+    
     <div class="flex justify-center mt-6 space-x-2">
       {% if page > 1 %}
         <a href="/copies?q={{q}}&branch_id={{selected_branch}}&page=1" class="px-3 py-1 border rounded">« First</a>

@@ -79,8 +79,6 @@ FROM Users u
 WHERE u.user_id > (SELECT MAX(user_id) - 5 FROM Users);
 
 
-INSERT INTO Users (name, email, phone, password, role)
-VALUES ('Admin User', 'admin@example.com', '1234567890', 'admin123', 'admin');
 
 INSERT INTO Users (name, email, phone, password, role)
 VALUES ('Admin User', 'admin@admin.com', '1234567890', 'admin', 'admin');

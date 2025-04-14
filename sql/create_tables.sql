@@ -47,7 +47,7 @@ CREATE TABLE BookCopies (
   book_id INT,
   branch_id INT,
   copy_barcode VARCHAR(50) UNIQUE,
-  status ENUM('available', 'borrowed', 'maintenance') DEFAULT 'available',
+  status ENUM('available', 'borrowed', 'reserved', 'maintenance') DEFAULT 'available',
   FOREIGN KEY (book_id) REFERENCES Books(book_id),
   FOREIGN KEY (branch_id) REFERENCES LibraryBranches(branch_id)
 );
@@ -75,40 +75,46 @@ CREATE TABLE BorrowingRecords (
   FOREIGN KEY (copy_id) REFERENCES BookCopies(copy_id)
 );
 
+-- 9. Reservations
+CREATE TABLE Reservations (
+  reservation_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  copy_id INT,
+  reservation_date DATE,
+  expiration_date DATE,
+  status ENUM('active','cancelled','fulfilled') DEFAULT 'active',
+  FOREIGN KEY (user_id) REFERENCES Users(user_id),
+  FOREIGN KEY (copy_id) REFERENCES BookCopies(copy_id)
+);
 
+-- 10. Fines
+CREATE TABLE Fines (
+  fine_id INT AUTO_INCREMENT PRIMARY KEY,
+  record_id INT,
+  amount DECIMAL(10,2),
+  fine_date DATE,
+  is_paid BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (record_id) REFERENCES BorrowingRecords(record_id)
+);
 
+-- 11. Payments
+CREATE TABLE Payments (
+  payment_id INT AUTO_INCREMENT PRIMARY KEY,
+  fine_id INT,
+  user_id INT,
+  payment_date DATETIME,
+  payment_amount DECIMAL(10,2),
+  payment_method ENUM('cash','credit_card','debit_card','online') DEFAULT 'online',
+  FOREIGN KEY (fine_id) REFERENCES Fines(fine_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
 
--- to do in the feature.
-
-
---9. Fines
--- CREATE TABLE Fines (
---   fine_id INT AUTO_INCREMENT PRIMARY KEY,
---   record_id INT,
---   amount DECIMAL(10,2),
---   fine_date DATE,
---   is_paid BOOLEAN DEFAULT FALSE,
---   FOREIGN KEY (record_id) REFERENCES BorrowingRecords(record_id)
--- );
-
--- -- 11. Payments
--- CREATE TABLE Payments (
---   payment_id INT AUTO_INCREMENT PRIMARY KEY,
---   fine_id INT,
---   user_id INT,
---   payment_date DATETIME,
---   payment_amount DECIMAL(10,2),
---   payment_method ENUM('cash','credit_card','debit_card','online') DEFAULT 'online',
---   FOREIGN KEY (fine_id) REFERENCES Fines(fine_id),
---   FOREIGN KEY (user_id) REFERENCES Users(user_id)
--- );
-
--- -- 12. Notifications
--- CREATE TABLE Notifications (
---   notification_id INT AUTO_INCREMENT PRIMARY KEY,
---   user_id INT,
---   message TEXT,
---   created_at DATETIME,
---   read_at DATETIME,
---   FOREIGN KEY (user_id) REFERENCES Users(user_id)
--- );
+-- 12. Notifications
+CREATE TABLE Notifications (
+  notification_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  message TEXT,
+  created_at DATETIME,
+  read_at DATETIME,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
